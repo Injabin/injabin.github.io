@@ -36,25 +36,57 @@
     cursor: none;
   }
 
-  /* CUSTOM CURSOR */
-  #cursor {
-    width: 20px; height: 20px;
-    border: 1.5px solid var(--cyan);
+  /* CUSTOM CURSOR — target reticle */
+  #cursor-outer {
+    width: 28px; height: 28px;
+    border: 1px solid rgba(0,255,213,0.6);
     border-radius: 50%;
     position: fixed;
     pointer-events: none;
     z-index: 9999;
-    transition: transform 0.1s, border-color 0.2s;
-    mix-blend-mode: exclusion;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s ease, height 0.25s ease, border-color 0.2s;
+    box-shadow: 0 0 6px rgba(0,255,213,0.15), inset 0 0 6px rgba(0,255,213,0.05);
   }
-  #cursor-dot {
-    width: 4px; height: 4px;
+  /* crosshair tick marks */
+  #cursor-outer::before, #cursor-outer::after {
+    content: '';
+    position: absolute;
+    background: rgba(0,255,213,0.55);
+  }
+  #cursor-outer::before { /* horizontal ticks */
+    width: 5px; height: 1px;
+    top: 50%; left: -7px;
+    transform: translateY(-50%);
+    box-shadow: 34px 0 0 rgba(0,255,213,0.55);
+  }
+  #cursor-outer::after { /* vertical ticks */
+    width: 1px; height: 5px;
+    left: 50%; top: -7px;
+    transform: translateX(-50%);
+    box-shadow: 0 34px 0 rgba(0,255,213,0.55);
+  }
+  #cursor-inner {
+    width: 3px; height: 3px;
     background: var(--cyan);
     border-radius: 50%;
     position: fixed;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
+    transition: width 0.12s, height 0.12s;
+    box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,213,0.3);
+  }
+  /* ambient glow under cursor */
+  #cursor-glow {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9990;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(0,255,213,0.055) 0%, transparent 70%);
+    transition: opacity 0.3s;
   }
 
   /* SCANLINE OVERLAY */
@@ -704,6 +736,127 @@
   .ach-sub { font-size: 11px; color: var(--text-dim); }
   .ach-date { font-size: 10px; color: var(--cyan); letter-spacing: 1px; margin-top: 4px; }
 
+  /* ACHIEVEMENTS SECTION */
+  #achievements { background: var(--bg); }
+
+  .ach-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .ach-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+  .ach-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+  }
+  .ach-card:hover {
+    border-color: var(--border-glow);
+    transform: translateY(-4px);
+  }
+  .ach-card:hover .ach-card-glow { opacity: 1; }
+
+  .ach-card-glow {
+    position: absolute;
+    top: 0; right: 0;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle at top right, rgba(0,255,213,0.06), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .ach-card-badge {
+    font-size: 28px;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .ach-card-year {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ach-card-year::before { content: ''; width: 16px; height: 1px; background: var(--cyan); }
+  .ach-card-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .ach-card-desc {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+  .ach-card-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 9px;
+    background: rgba(0,255,213,0.06);
+    color: var(--cyan-dim);
+    border: 1px solid var(--border);
+  }
+
+  /* CURRENT ACTIVITY BADGE */
+  .activity-bar {
+    margin-top: 48px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .activity-bar::before {
+    content: 'ACTIVE_MISSION';
+    position: absolute;
+    top: 10px; right: 16px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--amber);
+  }
+  .activity-pulse {
+    width: 8px; height: 8px;
+    background: var(--amber);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: amberpulse 2s infinite;
+  }
+  @keyframes amberpulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,179,71,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(255,179,71,0); }
+  }
+  .activity-text { flex: 1; }
+  .activity-label { font-size: 10px; letter-spacing: 2px; color: var(--amber); text-transform: uppercase; margin-bottom: 4px; }
+  .activity-desc { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  @media (max-width: 768px) {
+    .ach-grid { grid-template-columns: 1fr; }
+    .activity-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+
   /* CONTACT */
   #contact { background: var(--bg); position: relative; overflow: hidden; }
 
@@ -824,17 +977,35 @@
     nav { padding: 14px 20px; }
     .nav-links { display: none; }
     section { padding: 80px 20px; }
-    #hero { padding: 100px 20px 60px; }
-    .hero-avatar { display: none; }
+    #hero {
+      padding: 100px 20px 60px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 32px;
+    }
+    .hero-avatar {
+      display: flex;
+      width: 140px;
+      height: 140px;
+      max-width: 140px;
+      border-radius: 0;
+      border-left: none;
+      border: 1px solid rgba(0,255,213,0.2);
+      margin-top: 8px;
+    }
+    .hero-avatar img { object-position: top center; }
+    .avatar-hud { display: none; }
     .about-grid { grid-template-columns: 1fr; gap: 32px; }
     footer { flex-direction: column; gap: 8px; text-align: center; }
+    #cursor-outer, #cursor-inner, #cursor-glow { display: none; }
   }
 </style>
 </head>
 <body>
 
-<div id="cursor"></div>
-<div id="cursor-dot"></div>
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div id="cursor-glow"></div>
 
 <!-- Particles -->
 <div id="particles"></div>
@@ -846,6 +1017,7 @@
     <li><a href="#hero">INIT</a></li>
     <li><a href="#skills">LOADOUT</a></li>
     <li><a href="#projects">LOGS</a></li>
+    <li><a href="#achievements">AWARDS</a></li>
     <li><a href="#about">MISSION</a></li>
     <li><a href="#contact">SIGNAL</a></li>
   </ul>
@@ -1021,7 +1193,31 @@
     <div class="section-line"></div>
   </div>
 
+  
+
   <div class="projects-grid">
+
+      <div class="project-card reveal" style="border-color: rgba(255,179,71,0.3); position: relative;">
+      <div class="project-glow" style="background: radial-gradient(circle at top right, rgba(255,179,71,0.08), transparent 60%);"></div>
+      <span class="project-status status-dev" style="background:rgba(255,179,71,0.1);color:var(--amber);border-color:rgba(255,179,71,0.3);">ACTIVE BUILD</span>
+      <div class="project-id" style="color:var(--amber);">PROJECT_006</div>
+      <div class="project-name">VTOL_DRONE</div>
+      <p class="project-desc">
+        Full-stack VTOL drone engineered from scratch with my former CanSat team.
+        Handling aerodynamics, flight controller firmware, and airframe structural design — bridging aerospace theory with embedded systems.
+      </p>
+      <div class="project-stack">
+        <span class="stack-tag">AEROSPACE</span>
+        <span class="stack-tag">FLIGHT CTRL</span>
+        <span class="stack-tag">EMBEDDED</span>
+        <span class="stack-tag">CAD</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+        <div style="width:6px;height:6px;background:var(--amber);border-radius:50%;animation:amberpulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-size:10px;color:var(--amber);letter-spacing:2px;">BUILDING IN PROGRESS</span>
+      </div>
+    </div>
+
     <div class="project-card reveal">
       <div class="project-glow"></div>
       <span class="project-status status-deployed">DEPLOYED</span>
@@ -1107,6 +1303,8 @@
       <a href="#" class="project-link">INIT_SEQUENCE →</a>
     </div>
 
+
+
     <div class="project-card reveal" style="border-style: dashed; display: flex; align-items: center; justify-content: center; min-height: 240px;">
       <div style="text-align: center;">
         <div style="font-family: var(--display); font-size: 32px; color: var(--border); margin-bottom: 8px;">+</div>
@@ -1117,10 +1315,82 @@
   </div>
 </section>
 
+<!-- ACHIEVEMENTS -->
+<section id="achievements">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">ACHIEVEMENT <span class="accent">LOG</span></h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="ach-grid">
+
+    <div class="ach-card reveal">
+      <div class="ach-card-glow"></div>
+      <span class="ach-card-badge">🛰️</span>
+      <div class="ach-card-year">2025</div>
+      <div class="ach-card-title">UIU CANSAT TEAM</div>
+      <p class="ach-card-desc">
+        Selected for the UIU CanSat team after a competitive interview process.
+        Working on aerospace systems, hardware-software integration, and satellite prototyping.
+      </p>
+      <span class="ach-card-tag">AEROSPACE</span>
+      <span class="ach-card-tag">SELECTED</span>
+    </div>
+
+    <div class="ach-card reveal">
+      <div class="ach-card-glow"></div>
+      <span class="ach-card-badge">⚛️</span>
+      <div class="ach-card-year">2025</div>
+      <div class="ach-card-title">PHYSICS OLYMPIAD</div>
+      <p class="ach-card-desc">
+        Participated in the UIU university-level Physics Competition as part of a team.
+        Awarded an accomplishment certificate for performance and teamwork.
+      </p>
+      <span class="ach-card-tag">TEAM EVENT</span>
+      <span class="ach-card-tag">CERTIFIED</span>
+    </div>
+
+    <div class="ach-card reveal">
+      <div class="ach-card-glow"></div>
+      <span class="ach-card-badge">⭐</span>
+      <div class="ach-card-year">2024</div>
+      <div class="ach-card-title">HACKERRANK 5-STAR</div>
+      <p class="ach-card-desc">
+        Achieved 5-star rating in Java problem solving on HackerRank —
+        consistently solving algorithmic challenges at a high level.
+      </p>
+      <span class="ach-card-tag">JAVA</span>
+      <span class="ach-card-tag">ALGORITHM</span>
+      <a href="https://www.hackerrank.com/profile/malam2330344" target="_blank" class="project-link" style="display:inline-flex;margin-top:14px;font-size:10px;">VIEW PROFILE →</a>
+    </div>
+
+    <div class="ach-card reveal">
+      <div class="ach-card-glow"></div>
+      <span class="ach-card-badge">📄</span>
+      <div class="ach-card-year">2025</div>
+      <div class="ach-card-title">RESEARCH PREPRINT</div>
+      <p class="ach-card-desc">
+        Published a preprint on ResearchGate: <em style="color:var(--text)">Cybersecurity Incidents and Their Social Impacts — Case Studies and Ethical Implications.</em>
+      </p>
+      <span class="ach-card-tag">RESEARCH</span>
+      <span class="ach-card-tag">PUBLISHED</span>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
+        <a href="https://www.researchgate.net/publication/396774733_Cybersecurity_Incidents_and_Their_Social_Impacts_Case_Studies_and_Ethical_Implications" target="_blank" class="project-link" style="display:inline-flex;font-size:10px;">READ PAPER →</a>
+        <a href="https://www.researchgate.net/profile/Mdinjabin-Alam" target="_blank" class="project-link" style="display:inline-flex;font-size:10px;color:var(--text-dim);">RG PROFILE →</a>
+      </div>
+    </div>
+
+  </div>
+
+
+
+</section>
+
 <!-- ABOUT / MISSION -->
 <section id="about">
   <div class="section-header">
-    <span class="section-num">04</span>
+    <span class="section-num">05</span>
     <h2 class="section-title">MISSION <span class="accent">BRIEF</span></h2>
     <div class="section-line"></div>
   </div>
@@ -1237,27 +1507,47 @@
 </footer>
 
 <script>
-  // Custom cursor
-  const cursor = document.getElementById('cursor');
-  const dot = document.getElementById('cursor-dot');
+  // Target reticle cursor
+  const outer = document.getElementById('cursor-outer');
+  const inner = document.getElementById('cursor-inner');
+  const glow  = document.getElementById('cursor-glow');
   let mx = 0, my = 0;
+  let ox = 0, oy = 0;
 
   document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px';
-    dot.style.top = my + 'px';
+    mx = e.clientX;
+    my = e.clientY;
+    inner.style.left = mx + 'px';
+    inner.style.top  = my + 'px';
+    glow.style.left  = mx + 'px';
+    glow.style.top   = my + 'px';
   });
 
-  function animCursor() {
-    cursor.style.left = (mx - 10) + 'px';
-    cursor.style.top = (my - 10) + 'px';
-    requestAnimationFrame(animCursor);
-  }
-  animCursor();
+  (function animOuter() {
+    ox += (mx - ox) * 0.13;
+    oy += (my - oy) * 0.13;
+    outer.style.left = ox + 'px';
+    outer.style.top  = oy + 'px';
+    requestAnimationFrame(animOuter);
+  })();
 
   document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.style.transform = 'scale(1.6)');
-    el.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+    el.addEventListener('mouseenter', () => {
+      outer.style.width  = '40px';
+      outer.style.height = '40px';
+      outer.style.borderColor = 'var(--cyan)';
+      outer.style.boxShadow = '0 0 12px rgba(0,255,213,0.25), inset 0 0 8px rgba(0,255,213,0.08)';
+      inner.style.width  = '5px';
+      inner.style.height = '5px';
+    });
+    el.addEventListener('mouseleave', () => {
+      outer.style.width  = '28px';
+      outer.style.height = '28px';
+      outer.style.borderColor = 'rgba(0,255,213,0.6)';
+      outer.style.boxShadow = '0 0 6px rgba(0,255,213,0.15), inset 0 0 6px rgba(0,255,213,0.05)';
+      inner.style.width  = '3px';
+      inner.style.height = '3px';
+    });
   });
 
   // Particles
